@@ -48,20 +48,16 @@ class YandexConfig(BaseModel):
     sa_key_path: str = ""
     zone_id: str = "ru-central1-a"
     ip_limit: int = 2
+    target_match_count: int = 1
 
 
 class YandexRollerConfig(RollerConfig):
     """Yandex-specific roller settings with appropriate defaults."""
     allowed_ranges: List[str] = [
         "51.250.0.0/17",
-        "84.201.128.0/18",
-        "87.250.247.0/24",
-        "87.250.251.0/24",
-        "87.250.250.0/24",
-        "87.250.254.0/24",
-        "77.88.21.0/24"
+        "84.201.128.0/18"
     ]
-    polling_delay: float = 1.0
+    polling_delay: float = 0.0
 
 
 class YandexServiceConfig(BaseModel):
@@ -79,17 +75,13 @@ class RegruApiConfig(BaseModel):
     api_token: str = ""
     api_base_url: str = "https://api.cloudvps.reg.ru/v1/reglets"
     region_slug: str = "openstack-msk1"
-    server_size: str = "c2-m2-d10-base"
+    server_size: str = "c1-m1-d10-hp"
     server_image: str = "ubuntu-18-04-amd64"
     ip_limit: int = 2
 
 
 class RegruRollerConfig(RollerConfig):
-    """Reg.ru specific roller settings.
-    
-    Key difference from Yandex: VM creation takes ~90 seconds,
-    and deletion requires polling until status == 'archive'.
-    """
+    """Reg.ru specific roller settings synced with source/regru.py."""
     allowed_ranges: List[str] = [
         "79.174.91.0/24",
         "79.174.92.0/24",
@@ -97,16 +89,16 @@ class RegruRollerConfig(RollerConfig):
         "79.174.94.0/24",
         "79.174.95.0/24",
         "37.140.192.0/24",
-        "37.140.193.0/24",
-        "37.140.194.0/24",
-        "37.140.195.0/24",
+        "89.108.126.0/24",
         "31.31.196.0/24",
-        "31.31.197.0/24",
-        "31.31.198.0/24",
+        "89.111.170.0/24",
         "213.189.204.0/24"
     ]
-    # Industrial timings based on Reg.ru behavior analysis (see need_to_integrate/)
-    initial_wait: float = 90.0        # Hard wait after VM creation before polling
+    # Reference timings from source/regru.py
+    initial_wait: float = 0.0         # No hard wait – start polling immediately
+    check_interval: float = 10.0      # 10s intervals
+    timeout_wait_time: float = 120.0  # 2m wait after timeout
+    delete_wait_time: float = 90.0    # 1.5m wait after deletion
     check_interval: float = 5.0       # Interval between status checks
     stability_checks: int = 3         # N consecutive 'active+IP' checks to confirm stability
     delete_wait: float = 10.0         # Cooldown after deletion before next iteration
@@ -150,7 +142,6 @@ class AppConfig(BaseModel):
     # Global settings
     language: str = "en"
     skip_language_selection: bool = False
-    theme: str = "dark"
     active_service: str = "yandex"
     telegram: TelegramConfig = Field(default_factory=TelegramConfig)
     debug: bool = False

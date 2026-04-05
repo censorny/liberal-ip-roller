@@ -45,9 +45,9 @@ class RegruClient(CloudService):
         region_slug: str,
         server_size: str,
         server_image: str,
-        initial_wait: float = 90.0,
-        check_interval: float = 5.0,
-        stability_checks: int = 3,
+        initial_wait: float = 0.0,
+        check_interval: float = 10.0,
+        stability_checks: int = 1,
         delete_wait: float = 10.0,
         vm_active_timeout: float = 240.0,
         vm_delete_timeout: float = 180.0,
@@ -105,7 +105,8 @@ class RegruClient(CloudService):
                 resp = await self.http_client.request(method, url, **kwargs)
 
                 # 500 on DELETE is a known Reg.ru quirk — retry
-                if resp.status_code == 500 and attempt < max_retries - 1:
+                # 400 on DELETE usually means VM is locked/building — retry to allow unlocking
+                if method == "DELETE" and resp.status_code in (400, 500) and attempt < max_retries - 1:
                     await asyncio.sleep(retry_delay)
                     continue
 
@@ -176,21 +177,7 @@ class RegruClient(CloudService):
             folder_id="regru",
         )
 
-    async def _check_port_reachability(self, ip: str, port: int = 22, timeout: float = 2.0) -> bool:
-        """
-        Industrial-grade TCP ping.
-        Attempts to open a socket to the target IP and port.
-        Returns True if successful, False otherwise.
-        """
-        try:
-            # Run in a thread to avoid blocking the event loop for the synchronous socket call
-            def connect():
-                with socket.create_connection((ip, port), timeout=timeout):
-                    return True
-            
-            return await asyncio.to_thread(connect)
-        except (socket.timeout, ConnectionRefusedError, OSError):
-            return False
+
 
     # ──────────────────────────────────────────────
     #  CloudService CONTRACT IMPLEMENTATION
@@ -302,22 +289,9 @@ class RegruClient(CloudService):
                     )
 
                 if status == "active" and ip:
-                    # ── Phase 3: Industrial Health-check ────────────────────────
-                    # API says active, but is the OS network ready?
-                    # We try to reach the SSH port (standard for CloudVPS)
-                    hs_deadline = asyncio.get_event_loop().time() + 60.0 # extra 60s for network
-                    while asyncio.get_event_loop().time() < hs_deadline:
-                        if await self._check_port_reachability(ip):
-                            # VM is stable AND reachable — SUCCESS
-                            return op_id
-                        await asyncio.sleep(self.check_interval)
-                    
-                    # If reachability fails, we continue polling status 
-                    # (maybe it transitioned back or is unstable)
-                    stability_counter = 0
-                else:
-                    # Reset counter on any non-stable response
-                    stability_counter = 0
+                    # VM is active and has an IP address assigned — SUCCESS
+                    # source/regru.py logic: return immediately on first find
+                    return op_id
 
             except RegruApiException:
                 raise

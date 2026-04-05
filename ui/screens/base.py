@@ -1,6 +1,6 @@
 """
 Base UI components and mixins for Liberal IP Roller.
-Provides standardized notification and theme synchronization utilities.
+Provides standardized notification utilities.
 """
 
 from typing import Optional
@@ -24,35 +24,26 @@ class UIHelperMixin:
 class BaseScreen(Screen, UIHelperMixin):
     """
     Base class for all full-screen application views.
-    Ensures theme synchronization and focus management.
+    Ensures focus management.
     """
     def on_mount(self) -> None:
-        """ Synchronizes theme on initial mount. """
-        self._sync_theme()
+        """ Focus management on initial mount. """
         self.set_focus(None)
 
     def on_resume(self) -> None:
-        """ Re-synchronizes theme when returning to the screen. """
-        self._sync_theme()
-
-    def _sync_theme(self) -> None:
-        """ Helper to force app-wide theme application to this screen. """
-        if hasattr(self.app, "apply_theme"):
-            self.app.apply_theme()
+        """ Focus management when returning. """
+        pass
 
 
 class BaseModalScreen(ModalScreen, UIHelperMixin):
     """
     Base class for all modal dialogs.
-    Ensures theme consistency and non-blocking lifecycle.
+    Ensures non-blocking lifecycle.
     """
     def on_mount(self) -> None:
-        """ Synchronizes theme on initial mount. """
-        if hasattr(self.app, "apply_theme"):
-            self.app.apply_theme()
+        """ Focus management on initial mount. """
         self.set_focus(None)
 
     def on_resume(self) -> None:
-        """ Re-synchronizes theme when returning to the modal. """
-        if hasattr(self.app, "apply_theme"):
-            self.app.apply_theme()
+        """ Non-blocking return. """
+        pass

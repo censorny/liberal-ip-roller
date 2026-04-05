@@ -18,18 +18,27 @@ class IpRow(Horizontal):
     Encapsulated UI component representing a single IP address row.
     Standardized OOP approach for reliable event handling.
     """
-    def __init__(self, ip_id: str, address: str, **kwargs) -> None:
+    def __init__(self, ip_id: str, address: str, is_reserved: bool = True, **kwargs) -> None:
         super().__init__(classes="ip-item-row", **kwargs)
         self.ip_id = ip_id
         self.address = address
+        self.is_reserved = is_reserved
 
     def compose(self) -> ComposeResult:
         """ Renders the IP address and its dedicated delete button. """
-        yield Label(f"{self.address} ({self.ip_id[:8]}...)")
+        is_reserved = getattr(self, "is_reserved", True) # Backward compat
+        
+        display_addr = self.address if self.address else "Internal/Locked"
+        addr_text = f"{display_addr} ({self.ip_id[:8]}...)"
+        if not is_reserved:
+            addr_text += " [LOCKED: VM]"
+            
+        yield Label(addr_text)
         yield Button(
             self.app._t("delete_btn"),
             variant="error",
-            id="btn-delete"
+            id="btn-delete",
+            disabled=not is_reserved
         )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -99,7 +108,11 @@ class IpLimitModal(BaseModalScreen):
 
             with Vertical(id="ip-list-container"):
                 for addr in self.addresses:
-                    yield IpRow(ip_id=addr["id"], address=addr["address"])
+                    yield IpRow(
+                        ip_id=addr["id"], 
+                        address=addr["address"],
+                        is_reserved=addr.get("reserved", True)
+                    )
 
             with Horizontal(classes="action-row-modal"):
                 yield Button(

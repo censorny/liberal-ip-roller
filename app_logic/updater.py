@@ -83,9 +83,14 @@ class UpdateManager:
         This provides safe in-place replacement on Windows.
         """
         try:
-            # We assume bootstrap_updater.py has already been checked/created
+            bootstrap_script = os.path.join(os.getcwd(), "bootstrap_updater.py")
+            if not os.path.exists(bootstrap_script):
+                return False
+
             # Launch the script detached to survive the current process death
-            args = [sys.executable, "bootstrap_updater.py", str(os.getpid())]
+            # Pass our PID to the bootstrap script
+            current_pid = os.getpid()
+            args = [sys.executable, bootstrap_script, str(current_pid)]
             
             if os.name == "nt":
                 # Windows Detached Process
@@ -101,7 +106,7 @@ class UpdateManager:
             # Exit cleanly. The bootstrap script is now in control.
             sys.exit(0)
         except Exception:
-            pass
+            return False
 
     def _is_newer(self, remote_version: str) -> bool:
         """

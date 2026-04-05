@@ -123,7 +123,8 @@ class AppController:
                 on_log=self._on_log,
                 on_stats=self._on_stats,
                 on_match=self._handle_match,
-                on_error=self._handle_error
+                on_error=self._handle_error,
+                request_quota_resolution=self._request_quota_resolution
             )
 
             # Update Telegram client
@@ -180,37 +181,50 @@ class AppController:
                 ip_limit = self._get_ip_limit()
 
                 # BUG FIX: Uses dynamic ip_limit instead of hardcoded 2
-                addresses = await self.client.list_addresses()
+                # Filter managed IPs from ephemeral VMs
+                all_addresses = await self.client.list_addresses()
+                addresses = [a for a in all_addresses if a.reserved]
+                
+                # BUG FIX: Only trigger the proactive modal if we have reached the user's MANAGED limit
+                # If we have VMs, they are ignored here (but still shown in the modal for context)
                 if len(addresses) >= ip_limit:
                     if self._on_log:
                         self._on_log(
-                            f"[bold yellow]Cloud IP/VM limit reached "
+                            f"[bold yellow]Application managed IP limit reached "
                             f"({len(addresses)}/{ip_limit}). Requesting resolution...[/bold yellow]"
                         )
 
                     if self._request_quota_resolution:
                         addr_to_del = await self._request_quota_resolution(
-                            [a.model_dump() for a in addresses],
-                            current_count=len(addresses),
+                            [a.model_dump() for a in all_addresses], # Send ALL for transparency
+                            current_count=len(all_addresses),
                             ip_limit=ip_limit
                         )
-
                         if addr_to_del == "all":
                             for addr in addresses:
                                 op_id = await self.client.delete_address(addr.id)
-                                if op_id:
+                                if op_id and self.config_provider.config.active_service == "yandex":
                                     try:
                                         await self.client.wait_for_operation(op_id)
                                     except Exception:
                                         pass  # Best-effort wait on bulk delete
                         elif addr_to_del:
                             op_id = await self.client.delete_address(addr_to_del)
-                            if op_id:
+                            if op_id and self.config_provider.config.active_service == "yandex":
                                 await self.client.wait_for_operation(op_id)
                         else:
                             if self._on_log:
                                 self._on_log("Sequence cancelled by user.")
                             return
+                    else:
+                        # Limit reached but NO manageable IPs found
+                        if self._on_log:
+                            self._on_log(
+                                f"[bold red]Quota FULL ({len(all_addresses)}/{ip_limit})! "
+                                f"All active IPs are ephemeral (VM-bound). "
+                                f"Manual detachment required in Cloud Console.[/bold red]"
+                            )
+                        return
 
                 await self.roller.roll_one()
             except Exception as e:
@@ -243,15 +257,17 @@ class AppController:
 
         try:
             # Fresh read from cloud — only returns non-archived IPs
-            addresses = await self.client.list_addresses()
+            all_addresses = await self.client.list_addresses()
+            
+            # Show ALL addresses in the list, but filter the 'all' action to only reserved ones
             if self._on_log:
                 self._on_log(
                     f"[bold blue]ℹ[/bold blue] Synchronizing cloud state... "
-                    f"({len(addresses)} active {'VM' if self.config_provider.config.active_service == 'regru' else 'IP'}(s) found)"
+                    f"({len(all_addresses)} active {'VM' if self.config_provider.config.active_service == 'regru' else 'IP'}(s) found)"
                 )
 
             addr_to_del = await request_resolution_via_ui_fn(
-                [a.model_dump() for a in addresses]
+                [a.model_dump() for a in all_addresses] # Send ALL
             )
 
             if not addr_to_del:
@@ -259,7 +275,7 @@ class AppController:
 
             if addr_to_del == "all":
                 # BUG FIX: await each deletion instead of fire-and-forget
-                for addr in addresses:
+                for addr in all_addresses:
                     try:
                         op_id = await self.client.delete_address(addr.id)
                         if op_id:
@@ -276,7 +292,7 @@ class AppController:
                     self._on_log("[bold green]Success: All IPs/VMs deleted.[/bold green]")
 
             elif addr_to_del:
-                target_addr = next((a for a in addresses if a.id == addr_to_del), None)
+                target_addr = next((a for a in all_addresses if a.id == addr_to_del), None)
                 ip_str = target_addr.address if target_addr else addr_to_del
 
                 # BUG FIX: await deletion instead of fire-and-forget

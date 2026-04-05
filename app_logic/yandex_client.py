@@ -183,8 +183,8 @@ class YandexClient(CloudService):
         raise Exception("Request failed after max retries")
 
     async def list_addresses(self) -> List[CloudAddress]:
-        """ Fetches all reserved IP addresses in the target folder. """
-        url = f"{self.VPC_BASE_URL}?folderId={self.folder_id}"
+        """ Fetches all IP addresses (reserved and ephemeral) in the target folder. """
+        url = f"{self.VPC_BASE_URL}?folderId={self.folder_id}&pageSize=1000"
         res = await self._retry_request("GET", url)
         data = res.json()
         
@@ -196,7 +196,8 @@ class YandexClient(CloudService):
                 folder_id=addr.get("folderId", ""),
                 zone_id=ext_ip.get("zoneId", ""),
                 address=ext_ip.get("address", ""),
-                status=addr.get("status", "UNKNOWN")
+                status=addr.get("status", "UNKNOWN"),
+                reserved=addr.get("reserved", False) # Default to false for ephemeral IPs
             ))
         return addresses
 
@@ -221,11 +222,15 @@ class YandexClient(CloudService):
             )
             return res.json().get("id", "")
         except httpx.HTTPStatusError as e:
-            # Handle Yandex Cloud quota and rate-limiting errors
             if e.response.status_code in [403, 409, 429]:
-                raise YandexQuotaException(
-                    f"Cloud Limit Reached (HTTP {e.response.status_code})"
-                )
+                raise YandexQuotaException(f"Cloud Limit Reached (HTTP {e.response.status_code})")
+            
+            # 400 is returned for both Quotas and Invalid Parameters
+            if e.response.status_code == 400:
+                err_text = e.response.text.upper()
+                if any(k in err_text for k in ["QUOTA", "LIMIT", "OUT_OF_RESOURCE", "RESOURCE_EXHAUSTED"]):
+                    raise YandexQuotaException(f"Cloud Quota Exceeded (400): {e.response.text}")
+            
             raise e
 
     async def wait_for_operation(self, op_id: str, timeout: int = 60) -> str:
@@ -234,7 +239,7 @@ class YandexClient(CloudService):
         Enforces a minimum 1.0s delay to stay within Operations API limits.
         """
         start_time = asyncio.get_event_loop().time()
-        safe_poll_delay = max(1.0, self.polling_delay)
+        safe_poll_delay = max(0.0, self.polling_delay)
         
         while asyncio.get_event_loop().time() - start_time < timeout:
             try:
@@ -288,5 +293,6 @@ class YandexClient(CloudService):
             folder_id=addr.get("folderId", ""),
             zone_id=ext_ip.get("zoneId", ""),
             address=ext_ip.get("address", ""),
-            status=addr.get("status", "UNKNOWN")
+            status=addr.get("status", "UNKNOWN"),
+            reserved=addr.get("reserved", True)
         )

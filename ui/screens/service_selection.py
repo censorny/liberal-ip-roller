@@ -23,21 +23,29 @@ class ServiceSelection(BaseScreen):
         with Center():
             with Vertical(id="service-selection-box"):
                 yield Label(self.app._t("select_provider"), classes="title")
-                yield Button(
+                btn_yandex = Button(
                     self.app._t("yandex_cloud"),
                     id="btn-yandex",
                     variant="primary"
                 )
-                yield Button(
+                btn_yandex.can_focus = False
+                yield btn_yandex
+
+                btn_regru = Button(
                     self.app._t("regru_cloud"),
                     id="btn-regru",
                     variant="primary"
                 )
-                yield Button(
+                btn_regru.can_focus = False
+                yield btn_regru
+
+                btn_exit = Button(
                     self.app._t("exit"),
                     id="btn-exit",
                     variant="error"
                 )
+                btn_exit.can_focus = False
+                yield btn_exit
         yield Footer()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:

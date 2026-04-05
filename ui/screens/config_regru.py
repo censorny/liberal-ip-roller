@@ -8,7 +8,7 @@ from typing import List, Optional
 
 from textual.app import ComposeResult
 from textual.widgets import Button, Footer, Label, Input, TextArea
-from textual.containers import Container, Horizontal, VerticalScroll
+from textual.containers import Container, Horizontal, VerticalScroll, Vertical
 
 from ui.widgets import CustomHeader
 from .base import BaseScreen
@@ -36,14 +36,14 @@ class ConfigRegruScreen(BaseScreen):
                     yield Label(self.app._t("api_token"))
                     yield Input(
                         value=api.api_token,
-                        placeholder="Bearer token from Reg.ru panel...",
+                        placeholder=self.app._t("api_token") + "...",
                         id="cfg-regru-token",
                         password=True
                     )
 
                 # API Base URL
                 with Horizontal():
-                    yield Label("API Base URL")
+                    yield Label(self.app._t("api_base_url"))
                     yield Input(
                         value=api.api_base_url,
                         placeholder="https://api.cloudvps.reg.ru/v1/reglets",
@@ -55,7 +55,7 @@ class ConfigRegruScreen(BaseScreen):
                     yield Label(self.app._t("region_slug"))
                     yield Input(
                         value=api.region_slug,
-                        placeholder="e.g. openstack-msk1",
+                        placeholder=self.app._t("region_slug") + "...",
                         id="cfg-regru-region"
                     )
 
@@ -86,8 +86,18 @@ class ConfigRegruScreen(BaseScreen):
                         id="cfg-regru-limit"
                     )
 
+                # Target Matches Input
+                with Horizontal():
+                    yield Label(self.app._t("target_match_count"))
+                    yield Input(
+                        value=str(getattr(api, "target_match_count", 1)),
+                        placeholder="1",
+                        id="cfg-regru-target-matches"
+                    )
+
                 # Timing Parameters
-                yield Label(self.app._t("regru_settings_title"), classes="subtitle")
+                yield Vertical(classes="separator")
+                yield Label(self.app._t("regru_settings_title"), classes="cidr-label")
 
                 with Horizontal():
                     yield Label(self.app._t("initial_wait"))
@@ -122,11 +132,12 @@ class ConfigRegruScreen(BaseScreen):
                     )
 
                 # CIDR Whitelist
-                yield Label(self.app._t("cidr_ranges"))
-                yield TextArea(
-                    text="\n".join(process.allowed_ranges),
-                    id="cfg-regru-cidrs"
-                )
+                with Vertical(classes="cidr-card"):
+                    yield Label(self.app._t("cidr_ranges"), classes="cidr-label")
+                    yield TextArea(
+                        text="\n".join(process.allowed_ranges),
+                        id="cfg-regru-cidrs"
+                    )
 
             # Footer Actions
             with Horizontal(classes="action-row"):
@@ -166,15 +177,10 @@ class ConfigRegruScreen(BaseScreen):
             new_size = self.query_one("#cfg-regru-size", Input).value.strip()
             new_image = self.query_one("#cfg-regru-image", Input).value.strip()
 
-            # Only server connection params (region/size/image) are required.
-            # api_token can be empty at config time — it is validated at rolling start.
-            if not all([new_url, new_region, new_size, new_image]):
-                self.app.notify(self.app._t("config_incomplete"), severity="error")
-                return False
-
             # Numeric validation
             try:
                 new_limit = int(self.query_one("#cfg-regru-limit", Input).value)
+                new_target = int(self.query_one("#cfg-regru-target-matches", Input).value)
                 new_initial_wait = float(self.query_one("#cfg-regru-initial-wait", Input).value)
                 new_check_interval = float(self.query_one("#cfg-regru-check-interval", Input).value)
                 new_stability_checks = int(self.query_one("#cfg-regru-stability", Input).value)
@@ -183,8 +189,8 @@ class ConfigRegruScreen(BaseScreen):
                 self.app.notify(self.app._t("invalid_delay"), severity="error")
                 return False
 
-            if new_limit < 1:
-                self.app.notify("IP/VM limit must be >= 1", severity="error")
+            if new_limit < 1 or new_target < 1:
+                self.app.notify("Limits and Target must be >= 1", severity="error")
                 return False
 
             if new_initial_wait < 0 or new_check_interval <= 0 or new_stability_checks < 1:
@@ -209,6 +215,7 @@ class ConfigRegruScreen(BaseScreen):
             svc_config.api.server_size = new_size
             svc_config.api.server_image = new_image
             svc_config.api.ip_limit = new_limit
+            svc_config.api.target_match_count = new_target
             svc_config.process.initial_wait = new_initial_wait
             svc_config.process.check_interval = new_check_interval
             svc_config.process.stability_checks = new_stability_checks

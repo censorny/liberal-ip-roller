@@ -62,7 +62,6 @@ class CloudRollerApp(App):
         
         # State management
         self.logs_cache = deque(maxlen=100)
-        self.apply_theme()
         
         # Domain Controller (The Brain)
         self.controller = AppController(self.config_provider)
@@ -111,20 +110,6 @@ class CloudRollerApp(App):
         # Sync log cache limit
         svc_config = self.config_provider.config.get_service_config()
         self.logs_cache = deque(self.logs_cache, maxlen=svc_config.process.log_limit)
-
-    def apply_theme(self) -> None:
-        """ Applies the selected CSS theme globally. """
-        theme = self.config_provider.config.theme
-        theme_class = f"theme-{theme}"
-        classes = ["theme-dark", "theme-light", "theme-high-contrast"]
-
-        for t in classes:
-            if t == theme_class:
-                self.add_class(t)
-            else:
-                self.remove_class(t)
-        
-        self.refresh()
 
     async def on_mount(self) -> None:
         """ Startup logic: initializes clients, traps signals, and routes to the first screen. """

@@ -32,28 +32,25 @@ class Dashboard(BaseScreen):
         with Horizontal():
             # Navigation Sidebar
             with Vertical(id="sidebar"):
-                yield Button(
-                    self.app._t("dashboard_tab"),
-                    id="view-dashboard",
-                    variant="primary"
-                )
-                yield Button(
-                    self.app._t("manage_ips_tab"),
-                    id="view-addresses"
-                )
-                yield Button(
-                    self.app._t("config_tab"),
-                    id="view-config"
-                )
-                yield Button(
-                    self.app._t("settings_tab"),
-                    id="view-settings"
-                )
-                yield Button(
-                    self.app._t("back"),
-                    id="view-back",
-                    variant="error"
-                )
+                btn_dashboard = Button(self.app._t("dashboard_tab"), id="view-dashboard", variant="primary")
+                btn_dashboard.can_focus = False
+                yield btn_dashboard
+
+                btn_addr = Button(self.app._t("manage_ips_tab"), id="view-addresses")
+                btn_addr.can_focus = False
+                yield btn_addr
+
+                btn_cfg = Button(self.app._t("config_tab"), id="view-config")
+                btn_cfg.can_focus = False
+                yield btn_cfg
+
+                btn_set = Button(self.app._t("settings_tab"), id="view-settings")
+                btn_set.can_focus = False
+                yield btn_set
+
+                btn_back = Button(self.app._t("back"), id="view-back", variant="error")
+                btn_back.can_focus = False
+                yield btn_back
 
             # Main Operating Area
             with Vertical(id="main-content"):
@@ -73,26 +70,28 @@ class Dashboard(BaseScreen):
                         yield Label("0", id="app-matches", classes="stat-value")
 
                 # The engine's log output
-                yield RichLog(
+                log_view = RichLog(
                     markup=True,
                     highlight=True,
                     id="log-view",
                     max_lines=self.app.config_provider.config.get_service_config().process.log_limit
                 )
+                log_view.can_focus = False
+                yield log_view
 
                 # Control Buttons
                 with Horizontal(classes="action-row"):
-                    yield Button(
-                        self.app._t("start"),
-                        id="btn-start",
-                        variant="success"
-                    )
-                    yield Button(
-                        self.app._t("stop"),
-                        id="btn-stop",
-                        variant="error",
-                        disabled=True
-                    )
+                    btn_clear = Button(self.app._t("clear_logs"), id="btn-clear-logs", variant="warning")
+                    btn_clear.can_focus = False
+                    yield btn_clear
+
+                    btn_start = Button(self.app._t("start"), id="btn-start", variant="success")
+                    btn_start.can_focus = False
+                    yield btn_start
+
+                    btn_stop = Button(self.app._t("stop"), id="btn-stop", variant="error", disabled=True)
+                    btn_stop.can_focus = False
+                    yield btn_stop
         yield Footer()
 
     def on_mount(self) -> None:
@@ -128,6 +127,8 @@ class Dashboard(BaseScreen):
             self.start_rolling()
         elif btn_id == "btn-stop":
             self.stop_rolling()
+        elif btn_id == "btn-clear-logs":
+            self.query_one("#log-view", RichLog).clear()
         elif btn_id == "view-back":
             self.app.switch_screen("service_selection")
         elif btn_id == "view-config":

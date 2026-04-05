@@ -28,7 +28,6 @@ class SettingsScreen(BaseScreen):
         """ Renders the settings form with segmented sections. """
         self.config = self.app.config_provider.config
         self.selected_lang = self.config.language
-        self.selected_app_theme = self.config.theme
         
         svc_config = self.config.get_service_config()
         process = svc_config.process
@@ -56,35 +55,13 @@ class SettingsScreen(BaseScreen):
 
                 with Horizontal():
                     yield Label(self.app._t("skip_language"))
-                    yield Switch(
-                        value=self.config.skip_language_selection, 
-                        id="settings-skip-lang"
-                    )
+                    yield Switch(value=self.config.skip_language_selection, id="settings-skip-lang")
 
                 with Horizontal():
                     yield Label(self.app._t("debug_mode"))
                     yield Switch(value=self.config.debug, id="settings-debug")
 
                 # Theme Section
-                with Horizontal():
-                    yield Label(self.app._t("theme"))
-                    with Vertical(classes="toggle-stack"):
-                        yield Button(
-                            self.app._t("theme_dark"), 
-                            id="theme-dark", 
-                            classes="toggle-button " + ("-active" if self.selected_app_theme == "dark" else "")
-                        )
-                        yield Button(
-                            self.app._t("theme_light"), 
-                            id="theme-light", 
-                            classes="toggle-button " + ("-active" if self.selected_app_theme == "light" else "")
-                        )
-                        yield Button(
-                            self.app._t("theme_high_contrast"), 
-                            id="theme-hc", 
-                            classes="toggle-button " + ("-active" if self.selected_app_theme == "high-contrast" else "")
-                        )
-
                 yield Static(classes="separator")
                 yield Label(self.app._t("telegram_title"), classes="title")
                 with Horizontal():
@@ -147,10 +124,7 @@ class SettingsScreen(BaseScreen):
 
                 with Horizontal():
                     yield Label(self.app._t("auto_restart_on_error"))
-                    yield Switch(
-                        value=process.auto_restart_on_error, 
-                        id="settings-auto-restart"
-                    )
+                    yield Switch(value=process.auto_restart_on_error, id="settings-auto-restart")
 
                 with Horizontal():
                     yield Label(self.app._t("dry_run"))
@@ -175,23 +149,12 @@ class SettingsScreen(BaseScreen):
     def _update_toggle_group_ui(self) -> None:
         """ Syncs the '-active' CSS class for custom toggle buttons. """
         for btn in self.query("Button.toggle-button"):
-            if not btn.id:
-                continue
-            
-            is_active = False
-            if btn.id.startswith("lang-"):
+            if btn.id and btn.id.startswith("lang-"):
                 lang_val = btn.id.split("-")[1]
-                is_active = (self.selected_lang == lang_val)
-            elif btn.id.startswith("theme-"):
-                theme_val = btn.id.split("-")[1]
-                if theme_val == "hc":
-                    theme_val = "high-contrast"
-                is_active = (self.selected_app_theme == theme_val)
-            
-            if is_active:
-                btn.add_class("-active")
-            else:
-                btn.remove_class("-active")
+                if self.selected_lang == lang_val:
+                    btn.add_class("-active")
+                else:
+                    btn.remove_class("-active")
 
     def on_mount(self) -> None:
         """ Initial UI state synchronization. """
@@ -204,17 +167,11 @@ class SettingsScreen(BaseScreen):
         if not btn_id:
             return
 
-        # Handle custom toggle buttons (Lang/Theme)
+        # Handle custom toggle buttons (Lang only)
         if event.button.has_class("toggle-button"):
             if btn_id.startswith("lang-"):
                 self.selected_lang = btn_id.split("-")[1]
-            elif btn_id.startswith("theme-"):
-                theme_val = btn_id.split("-")[1]
-                if theme_val == "hc":
-                    theme_val = "high-contrast"
-                self.selected_app_theme = theme_val
-            
-            self._update_toggle_group_ui()
+                self._update_toggle_group_ui()
             self.refresh()
             return
 
@@ -296,12 +253,10 @@ class SettingsScreen(BaseScreen):
             config = self.app.config_provider.config
             svc_config = config.get_service_config()
 
-            # Track theme/lang changes for potential restart
-            old_theme = config.theme
+            # Track lang changes for potential restart
             old_lang = config.language
 
             config.language = self.selected_lang
-            config.theme = self.selected_app_theme
             config.skip_language_selection = skip_lang
             config.debug = debug_mode
 
@@ -326,13 +281,14 @@ class SettingsScreen(BaseScreen):
             self.app.notify(self.app._t("settings_saved"), severity="information")
             self.app.run_worker(self.app.update_client())
 
-            # If language or theme changed, restart the app to apply full reload
-            if old_theme != self.selected_app_theme or old_lang != self.selected_lang:
+            # If language changed, restart the app to apply full reload
+            if old_lang != self.selected_lang:
                 self.app.notify(self.app._t("applying_settings"), severity="information")
                 
                 # Industrial cross-platform restart:
                 # Use Popen to spawn a new process and then exit the current one.
                 # This works reliably on both Windows and Linux.
+                args = sys.argv
                 try:
                     subprocess.Popen([sys.executable] + args)
                     self.app.exit()

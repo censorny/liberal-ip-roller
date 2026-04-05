@@ -8,7 +8,7 @@ from typing import List, Optional
 
 from textual.app import ComposeResult
 from textual.widgets import Button, Footer, Label, Input, TextArea
-from textual.containers import Container, Horizontal, VerticalScroll
+from textual.containers import Container, Horizontal, VerticalScroll, Vertical
 
 from ui.widgets import CustomHeader
 from .base import BaseScreen
@@ -75,12 +75,22 @@ class ConfigScreen(BaseScreen):
                         id="cfg-ip-limit"
                     )
 
+                # Target Matches Input
+                with Horizontal():
+                    yield Label(self.app._t("target_match_count"))
+                    yield Input(
+                        value=str(getattr(config, "target_match_count", 1)),
+                        placeholder="1",
+                        id="cfg-target-matches"
+                    )
+
                 # CIDR Whitelist TextArea
-                yield Label(self.app._t("cidr_ranges"))
-                yield TextArea(
-                    text="\n".join(svc_config.process.allowed_ranges),
-                    id="cfg-cidrs"
-                )
+                with Vertical(classes="cidr-card"):
+                    yield Label(self.app._t("cidr_ranges"), classes="cidr-label")
+                    yield TextArea(
+                        text="\n".join(svc_config.process.allowed_ranges),
+                        id="cfg-cidrs"
+                    )
 
             # Footer Actions
             with Horizontal(classes="action-row"):
@@ -120,14 +130,6 @@ class ConfigScreen(BaseScreen):
             new_zone = self.query_one("#cfg-zone", Input).value.strip()
             new_cidrs_block = self.query_one("#cfg-cidrs", TextArea).text.strip()
 
-            # Validation logic:
-            # Must have Folder ID and Zone ID.
-            # AND must have either a manual IAM token OR a path to a SA Key JSON.
-            has_auth = (new_token or new_sa_key)
-            if not all([has_auth, new_folder, new_zone]):
-                self.app.notify(self.app._t("config_incomplete"), severity="error")
-                return False
-
             # IP Limit validation
             try:
                 new_ip_limit = int(self.query_one("#cfg-ip-limit", Input).value)
@@ -146,6 +148,15 @@ class ConfigScreen(BaseScreen):
                     self.app.notify(f"Invalid CIDR: {cidr}", severity="error")
                     return False
 
+            # Target Matches validation
+            try:
+                new_target = int(self.query_one("#cfg-target-matches", Input).value)
+                if new_target < 1:
+                    raise ValueError()
+            except ValueError:
+                self.app.notify("Target Matches must be a positive integer!", severity="error")
+                return False
+
             # Apply to configuration model
             svc_config = self.app.config_provider.config.get_service_config()
             svc_config.api.iam_token = new_token
@@ -153,6 +164,7 @@ class ConfigScreen(BaseScreen):
             svc_config.api.folder_id = new_folder
             svc_config.api.zone_id = new_zone
             svc_config.api.ip_limit = new_ip_limit
+            svc_config.api.target_match_count = new_target
             svc_config.process.allowed_ranges = new_cidrs
 
             # Save to disk

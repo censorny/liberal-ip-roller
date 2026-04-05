@@ -14,5 +14,6 @@ class CloudAddress(BaseModel):
     id: str
     address: str
     status: str
+    reserved: bool = True
     zone_id: Optional[str] = None
     folder_id: Optional[str] = None

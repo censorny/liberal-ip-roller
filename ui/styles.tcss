@@ -1,158 +1,213 @@
 /* 
- * Liberal IP Roller - TUI Design System 
- * Standardized Visual Hierarchy (Theme: Dark/Light/High-Contrast)
+ * Liberal IP Roller - Modern Design System (Neon & Cards)
+ * Complete Refactoring to eliminate "Windows 98" legacy.
  */
 
-/* --- Variables (Theme Tokens) --- */
-$brand-primary: #3b82f6;   /* Modern Blue */
-$brand-success: #10b981;   /* Emerald Green */
-$brand-error: #ef4444;     /* Rose Red */
-$slate-900: #0f172a;       /* Deep Slate */
-$slate-800: #1e293b;       /* Dark Panel */
-$slate-600: #475569;       /* Muted Text */
-$slate-400: #94a3b8;       /* Deactivated */
-$slate-200: #e2e8f0;       /* Border Light */
-$slate-100: #f1f5f9;       /* Light Panel */
-$slate-50: #f8fafc;        /* Background Light */
-$white: #ffffff;
-$black: #000000;
+/* --- Modern Palette Tokens (Zinc & Blue Apple-like Theme) --- */
+$surface-bg: #27272a;       /* Zinc 800 - Absolute Base */
+$surface-card: #27272a;     /* Monochromatic Background */
+$surface-elevated: #3f3f46; /* Zinc 700 - Hover / Highlight */
+$surface-light: #f8fafc;
+$surface-card-light: #ffffff;
+$surface-border: #3f3f46;   /* Tone-on-tone Border */
+$brand-primary: #0084ff;    /* Vibrant Blue Accent */
+$brand-primary-hover: #3399ff; /* Blue Hover */
 
-/* --- Base Layout --- */
-Screen { 
-    layout: vertical; 
-    align: center top; 
+$brand-success: #10b981;    /* Emerald */
+$brand-error: #f43f5e;      /* Rose */
+$brand-muted: #3f3f46;      /* Zinc 700 - Subtle Scrollbar */
+
+$text-muted: #a1a1aa;       /* Zinc 400 */
+$text-bright: #fafafa;      /* Zinc 50 */
+$text-dark: #18181b;
+
+/* --- Base Typography & Reset --- */
+Screen {
+    layout: vertical;
+    align: center top;
+    background: $surface-bg;
+    scrollbar-color: $brand-muted;
+    scrollbar-color-active: $brand-primary;
+    scrollbar-color-hover: $brand-primary-hover;
+    scrollbar-background: transparent !important;
+    scrollbar-size: 1 1;
 }
 
+Footer {
+    background: $surface-bg;
+    color: $text-muted;
+}
+
+Footer > .footer--key {
+    background: $surface-bg;
+    color: $brand-primary;
+    text-style: bold;
+}
+
+Footer > .footer--description {
+    background: $surface-bg;
+    color: $text-muted;
+}
+
+
+/* --- Floating Glass Header --- */
 CustomHeader {
+    height: auto;
+    padding: 0 3;
+    background: $surface-card;
+    color: $text-bright;
+    border-bottom: solid $brand-primary;
+    dock: top;
+}
+
+CustomHeader Horizontal {
     height: 1;
-    padding: 0 1;
-    background: $slate-800;
-    color: $white;
 }
 
 #header-brand { 
     width: 1fr; 
     text-style: bold; 
+    color: $brand-primary;
     content-align: left middle; 
 }
 
 #header-version { 
     width: auto; 
-    text-style: italic; 
-    color: $slate-400; 
+    text-style: italic bold; 
+    color: $text-muted; 
     content-align: right middle; 
 }
 
+/* --- Main Layout Architecture --- */
 #main-content {
-    background: transparent;
-    padding: 0;
+    background: $surface-card;
+    padding: 0 1; 
     height: 1fr;
     layout: vertical;
-    align: center top;
 }
 
-/* --- Interactive Widgets --- */
+/* --- The Dock (Sidebar) --- */
+#sidebar {
+    width: 32;
+    padding: 1 2;
+    background: $surface-card;
+    margin: 1 1 1 2;
+    border: round $surface-border;
+}
+
+#sidebar Button { 
+    width: 100%; 
+    height: 3;
+    margin-bottom: 1; 
+    background: $surface-card;
+    color: $text-muted;
+    border: round $surface-elevated;
+    text-align: center;
+    text-style: bold;
+    padding: 0 1;
+}
+
+#sidebar Button:hover {
+    background: $surface-card;
+    color: $text-bright;
+    border: round $surface-border;
+}
+
+#sidebar Button.-active {
+    background: $surface-card;
+    color: $brand-primary;
+    text-style: bold;
+    border: round $brand-primary;
+}
+
+
+/* --- Interactive Elements (Inputs & TextAreas) --- */
 Input, TextArea { 
-    width: 40; 
-    height: 3; 
+    background: $surface-card;
+    color: $text-bright; 
+    border: round $surface-border;
+    padding: 0 1;
 }
 
-/* CIDR TextArea inside config forms — aligned with form fields, enough height for multiple ranges */
+
+Input:focus, TextArea:focus {
+    background: $surface-card !important;
+    border: round $brand-primary;
+}
+
 .inputs-container TextArea {
-    width: 76;
+    width: 68;
     height: 10;
-    margin: 0 2 1 2;
+    margin: 0 0 1 0;
 }
 
-
+/* --- Modern Buttons (Pill Style) --- */
 Button { 
     text-style: bold; 
-}
-
-/* --- Theme Enforcement: DARK (Default) --- */
-.theme-dark, .theme-dark Screen { 
-    background: $black; 
-    color: $white; 
-}
-
-.theme-dark Label, .theme-dark Static { 
-    color: $white; 
-}
-
-.theme-dark Input, .theme-dark TextArea { 
-    background: transparent; 
-    color: $white; 
-    border: tall $slate-800; 
-}
-
-/* Heavy Action Buttons (Dark) */
-.theme-dark Button.-primary { background: $brand-primary; color: $white; border: none; }
-.theme-dark Button.-success { background: $brand-success; color: $white; border: none; }
-.theme-dark Button.-error   { background: $brand-error; color: $white; border: none; }
-
-/* --- Theme Enforcement: LIGHT --- */
-.theme-light, .theme-light Screen { 
-    background: #f8fafc; 
-    color: $slate-900; 
-}
-
-.theme-light Label, .theme-light Static { 
-    color: $slate-900; 
-}
-
-.theme-light CustomHeader { 
-    background: #f1f5f9; 
-    color: $slate-900; 
-    border-bottom: solid $brand-primary; 
-}
-
-.theme-light Footer { 
-    background: #f1f5f9; 
-    color: $slate-400; 
-}
-
-.theme-light Input, .theme-light TextArea { 
-    background: $white; 
-    color: $slate-900; 
-    border: tall $slate-200; 
-}
-
-/* --- Custom Components: Toggles --- */
-Button.toggle-button {
-    width: 30;
-    margin-bottom: 1;
+    border: round transparent; 
+    min-width: 16;
     height: 3;
-    background: transparent;
-    color: $slate-400;
-    border: tall $slate-400;
-    text-style: none;
+    padding: 0 1;
 }
 
-.theme-dark Button.toggle-button {
-    border: tall $slate-800;
-    color: $slate-600;
+/* Base Primary Action */
+Button { background: $surface-card; color: $text-muted; border: round $surface-border; }
+Button:hover { background: $surface-card; color: $text-bright; border: round $text-bright; }
+Button:focus { background: $surface-card !important; tint: transparent !important; text-style: none; }
+
+/* Themed Buttons */
+Button.-primary { background: $surface-card; color: $brand-primary; border: round $brand-primary; }
+Button.-primary:hover { background: $surface-card; color: $brand-primary-hover; border: round $brand-primary-hover; }
+Button.-primary:focus { background: $surface-card !important; tint: transparent !important; }
+
+Button.-success { background: $surface-card; color: $brand-success; border: round $brand-success; }
+Button.-success:hover { background: $surface-card; color: #34d399; border: round #34d399; }
+Button.-success:focus { background: $surface-card !important; tint: transparent !important; }
+
+Button.-error { background: $surface-card; color: $brand-error; border: round $brand-error; }
+Button.-error:hover { background: $surface-card; color: #fb7185; border: round #fb7185; }
+Button.-error:focus { background: $surface-card !important; tint: transparent !important; }
+
+Button.-warning { background: $surface-card; color: #f59e0b; border: round #f59e0b; }
+Button.-warning:hover { background: $surface-card; color: #fbbf24; border: round #fbbf24; }
+Button.-warning:focus { background: $surface-card !important; tint: transparent !important; }
+
+
+/* --- Toggles & Switches --- */
+
+Button.toggle-button {
+    background: $surface-card;
+    color: $text-muted;
+    border: round $surface-border;
+    text-style: none;
+    width: 100%;
+    margin: 0 0 1 0;
 }
 
 Button.toggle-button.-active {
     background: $brand-primary !important;
-    color: $white !important;
-    border: none !important;
+    color: $text-bright !important;
+    border: round $brand-primary !important;
     text-style: bold;
+    width: 100%;
 }
 
-/* --- Content Containers --- */
+/* --- Form Containers (Glass Cards) --- */
 .inputs-container { 
     height: 1fr; 
     align: center top; 
+    padding: 1 0;
+    background: $surface-card;
 }
 
 .inputs-container Horizontal { 
     width: 80;
     height: auto;
-    min-height: 4;
     align: center middle; 
     margin-bottom: 1; 
-    padding: 0 2;
+    padding: 1 3;
+    background: $surface-card; /* Individual floating cards for settings */
+    border: round $surface-border;
 }
 
 .inputs-container Horizontal Label { 
@@ -162,196 +217,157 @@ Button.toggle-button.-active {
 }
 
 .inputs-container Horizontal Input,
-.inputs-container Horizontal Switch,
-.inputs-container Horizontal .toggle-stack {
-    width: 32;
-    align: right middle;
+.inputs-container Horizontal .toggle-stack,
+.inputs-container Horizontal .toggle-button {
+    width: 34;
+    height: auto;
+    margin: 0;
 }
 
-.toggle-stack {
-    width: 30;
-    align: right middle;
+.cidr-card {
+    width: 80;
     height: auto;
+    align: center top;
+    margin-bottom: 1;
+    padding: 1 3;
+    background: $surface-card;
+    border: round $surface-border;
+}
+
+.cidr-label {
+    text-style: bold;
+    margin-bottom: 1;
+}
+
+
+
+.toggle-stack {
+    width: 34;
+    align: center middle;
+    height: auto;
+}
+
+.toggle-stack Button {
+    width: 100%;
 }
 
 .separator {
     width: 80;
     height: 1;
-    border-top: solid $slate-200;
-    margin: 1 0;
+    background: $surface-elevated;
+    margin: 2 0;
 }
 
-.theme-dark .separator {
-    border-top: solid $slate-800;
-}
-
-/* --- Navigation & Sidebar --- */
-#sidebar {
-    width: 25;
-    background: #f1f5f9;
-    padding: 1 1;
-    border-right: tall $slate-200;
-}
-
-.theme-dark #sidebar { 
-    background: $slate-800; 
-    border-right: tall #334155; 
-}
-
-#sidebar Button { 
-    width: 23; 
-    margin-bottom: 1; 
-    text-align: left; 
-}
-
-/* --- Dashboard Dashboard Elements --- */
+/* --- Dashboard Specifics --- */
 #stats-panel { 
-    padding: 1 2; 
-    height: 6; 
+    padding: 1 4; 
+    margin: 1 2 0 1;
+    height: 7; 
     layout: horizontal; 
     align: center middle; 
-    border-bottom: tall $brand-primary; 
-    width: 100%; 
-    background: $white;
+    background: $surface-card; /* Enclosed modern top card */
+    border: round $surface-border;
 }
-
-.theme-dark #stats-panel { background: $slate-800; }
 
 .stat-item { width: 1fr; align: center middle; text-align: center; }
-.stat-label { text-style: bold; color: $slate-400; }
-.stat-value { text-style: bold; color: $brand-primary; }
+.stat-label { text-style: bold; color: $text-muted; margin-bottom: 1; }
+.stat-value { text-style: bold; color: $brand-primary; } /* E.g. huge numbers */
 
 #log-view {
-    background: $white;
-    color: $slate-900;
+    background: $surface-card;
+    color: $text-bright;
+    border: round $surface-border;
+    margin: 1 2 1 1;
+    padding: 1 2;
     height: 1fr;
-    border: tall $slate-200;
-    margin: 1 2;
 }
 
-.theme-dark #log-view { background: $black; color: $white; border: tall $slate-800; }
 
-/* --- Forms & Modals --- */
+/* Control Action Row */
 .action-row { 
     dock: bottom;
     height: 5; 
-    padding: 0 2; 
-    align: center middle; 
+    padding: 0 4; 
+    align: right middle; /* Align modern UI actions to the right like mac */
     width: 100%; 
-    background: $slate-100;
-    border-top: tall $slate-200; 
-}
-
-.theme-dark .action-row {
-    background: $slate-800;
-    border-top: tall $slate-900;
+    background: $surface-card;
 }
 
 .action-row Button { 
-    width: 25; 
-    margin: 0 1; 
+    width: 20; 
+    margin: 0 0;
+    margin-left: 1;
 }
 
+/* --- Boot / Service Selection Cards --- */
 #service-selection-box {
     align: center middle;
-    margin-top: 5;
+    margin-top: 2;
     width: 64;
     height: auto;
-    padding: 2 4;
-    background: $white;
-    border: tall $brand-primary; 
-}
-
-.theme-dark #service-selection-box { 
-    background: $slate-800; 
-    border: tall $brand-primary; 
+    padding: 3 4;
+    background: $surface-card;
+    border: round $brand-primary; /* Glowing rounded accent box */
 }
 
 #service-selection-box Label {
     width: 100%;
-    text-align: center;
+    margin-bottom: 2;
 }
 
 #service-selection-box Button {
-    width: 52;
+    width: 100%;
     height: 3;
     margin: 1 0;
-    background: $brand-primary;
-    color: $white;
-    border: tall $brand-primary;
-    text-style: bold;
 }
 
-#service-selection-box Button:hover {
-    background: #2563eb;
-}
-
-#service-selection-box Button.-error,
-#service-selection-box #btn-exit {
-    background: $brand-error;
-    color: $white;
-    border: tall $brand-error;
-}
-
+/* --- Floating Modal Dialogs --- */
 .modal-dialog {
-    width: 60;
+    width: 65;
     height: auto;
-    background: #f8fafc;
-    border: tall $brand-primary;
+    background: $surface-card;
     padding: 1 2;
-    align: center middle;
+    border: round $surface-elevated;
 }
 
-.theme-dark .modal-dialog {
-    background: $slate-800;
-    border: tall $brand-primary;
+#ip-list-container {
+    height: auto;
+    max-height: 12;
+    overflow-y: scroll;
+    padding: 1 1;
 }
 
 .ip-item-row {
     width: 100%;
-    height: 3;
-    background: $white;
-    border: solid $slate-200;
-    margin-bottom: 1;
-    padding: 0 1;
-    align: center middle;
+    height: auto;
+    background: $surface-bg;
+    margin-bottom: 0;
+    padding: 0 2;
+    border-left: solid $brand-primary;
 }
 
-.theme-dark .ip-item-row {
-    background: #0f172a;
-    border: solid #334155;
+/* Modal Actions Layer */
+.action-row-modal {
+    height: 5;
+    margin-top: 1;
+    align: center middle;
+    width: 100%;
+    background: $surface-elevated; /* Subtle contrast */
+}
+
+.action-row-modal Button {
+    margin: 0 1;
+    min-width: 18;
 }
 
 .version-row {
     height: auto;
-    margin-top: 1;
-}
-
-.version-row Label {
-    width: 1fr;
-    text-align: left;
-}
-
-.version-row Button {
-    width: 32;
-    background: $brand-primary;
-    color: $white;
-    border: double $white;
-    text-style: underline bold;
-}
-
-#update-status {
-    width: 100%;
-    text-align: center;
-    margin-top: 1;
-    color: $brand-success;
-    text-style: bold;
-}
-
-.update-status-hidden {
-    display: none;
+    margin-top: 2;
+    padding: 1 2;
+    background: $surface-card;
 }
 
 /* Global Utility Classes */
 .title { text-align: center; width: 100%; text-style: bold; margin: 1 0; color: $brand-primary; }
-.subtitle { text-align: center; width: 100%; color: $slate-400; margin-bottom: 2; }
+.inputs-container .title { width: 80; }
+.subtitle { text-align: center; width: 100%; color: $text-muted; margin-bottom: 2; }
