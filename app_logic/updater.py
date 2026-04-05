@@ -7,6 +7,7 @@ import asyncio
 import json
 import os
 import sys
+import time
 import subprocess
 from typing import Optional, Tuple, Dict, Any
 
@@ -43,7 +44,8 @@ class UpdateManager:
             A tuple of (is_update_available, remote_version_string_or_error_flag).
         """
         try:
-            url = f"{self.base_url}/version.json"
+            # Cache-busting for GitHub Raw (CDN)
+            url = f"{self.base_url}/version.json?t={int(time.time())}"
             async with httpx.AsyncClient(timeout=15.0, verify=True) as client:
                 res = await client.get(url)
                 res.raise_for_status()
