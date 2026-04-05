@@ -182,7 +182,7 @@ class SettingsScreen(BaseScreen):
         elif btn_id == "btn-cancel":
             self.app.switch_screen("dashboard")
         elif btn_id == "btn-check-updates":
-            self.check_for_updates()
+            self.run_worker(self.check_for_updates())
 
     async def check_for_updates(self) -> None:
         """ Dispatches update check to the UpdateManager. """
@@ -201,6 +201,11 @@ class SettingsScreen(BaseScreen):
             self.app.notify(
                 self.app._t("update_available", version=version), 
                 severity="warning"
+            )
+        elif version == "error":
+            self.app.notify(
+                self.app._t("update_error"), 
+                severity="error"
             )
         else:
             self.app.notify(

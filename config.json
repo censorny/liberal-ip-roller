@@ -2,15 +2,15 @@
     "yandex": {
         "api": {
             "iam_token": "",
-            "folder_id": "",
-            "sa_key_path": "",
+            "folder_id": "b1g95fjmde1lr5qp96sb",
+            "sa_key_path": "C:\\Users\\tromb\\Downloads\\authorized_key.json",
             "zone_id": "ru-central1-a",
             "ip_limit": 2,
             "target_match_count": 1
         },
         "process": {
             "allowed_ranges": [
-                "51.250.0.0/16"
+                "51.250.0.0/17"
             ],
             "min_delay": 0.0,
             "max_delay": 0.0,
@@ -23,7 +23,7 @@
             "auto_restart_on_error": true,
             "report_errors_to_tg": false,
             "report_matches_to_tg": true,
-            "polling_delay": 0.5
+            "polling_delay": 0.0
         }
     },
     "regru": {
@@ -33,12 +33,23 @@
             "region_slug": "openstack-msk1",
             "server_size": "c2-m2-d10-base",
             "server_image": "ubuntu-18-04-amd64",
-            "ip_limit": 2,
-            "target_match_count": 1
+            "ip_limit": 2
         },
         "process": {
             "allowed_ranges": [
-                "79.174.91.0/24"
+                "79.174.91.0/24",
+                "79.174.92.0/24",
+                "79.174.93.0/24",
+                "79.174.94.0/24",
+                "79.174.95.0/24",
+                "37.140.192.0/24",
+                "31.31.196.0/24",
+                "213.189.204.0/24",
+                "31.31.197.0/24",
+                "31.31.198.0/24",
+                "37.140.193.0/24",
+                "37.140.194.0/24",
+                "37.140.195.0/24"
             ],
             "min_delay": 5.0,
             "max_delay": 15.0,
@@ -54,14 +65,16 @@
             "polling_delay": 1.0,
             "initial_wait": 90.0,
             "check_interval": 5.0,
+            "timeout_wait_time": 120.0,
+            "delete_wait_time": 90.0,
             "stability_checks": 3,
             "delete_wait": 10.0,
             "vm_active_timeout": 240.0,
             "vm_delete_timeout": 180.0
         }
     },
-    "language": "en",
-    "skip_language_selection": false,
+    "language": "ru",
+    "skip_language_selection": true,
     "active_service": "yandex",
     "telegram": {
         "enabled": false,

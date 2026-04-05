@@ -1,5 +1,5 @@
 {
-    "version": "0.3.1",
+    "version": "0.3.2",
     "release_date": "2026-04-05",
-    "description": "Industrial Release v0.3.1 — UI Hardening, Reg.ru Synchronization, and Enhanced Stability"
+    "description": "Industrial Release v0.3.2 — Critical fix for the update mechanism and enhanced error reporting"
 }

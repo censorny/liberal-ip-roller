@@ -40,11 +40,11 @@ class UpdateManager:
         Fetches the remote version.json and compares it with the local version.
         
         Returns:
-            A tuple of (is_update_available, remote_version_string).
+            A tuple of (is_update_available, remote_version_string_or_error_flag).
         """
         try:
             url = f"{self.base_url}/version.json"
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            async with httpx.AsyncClient(timeout=15.0, verify=True) as client:
                 res = await client.get(url)
                 res.raise_for_status()
                 data = res.json()
@@ -55,8 +55,8 @@ class UpdateManager:
 
             return False, None
         except Exception:
-            # Silently fail on network/parse errors during check
-            return False, None
+            # Return "error" string to let UI distinguish between "no updates" and "failed to check"
+            return False, "error"
 
     async def download_update(self) -> bool:
         """
