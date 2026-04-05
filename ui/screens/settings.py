@@ -214,7 +214,8 @@ class SettingsScreen(BaseScreen):
                 if success:
                     self.app.notify(self.app._t("applying_settings"), severity="warning")
                     await asyncio.sleep(1.0)
-                    updater.trigger_bootstrap()
+                    if updater.trigger_bootstrap():
+                        self.app.exit()
                 else:
                     self.app.notify(self.app._t("update_failed"), severity="error")
         elif version == "error":

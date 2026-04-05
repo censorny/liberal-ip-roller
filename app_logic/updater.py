@@ -103,8 +103,8 @@ class UpdateManager:
                 # POSIX Background Process
                 subprocess.Popen(args, start_new_session=True)
 
-            # Exit cleanly. The bootstrap script is now in control.
-            sys.exit(0)
+            # Return success. The UI will call self.app.exit() to shut down.
+            return True
         except Exception:
             return False
 
