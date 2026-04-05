@@ -83,7 +83,7 @@ class UpdateManager:
         This provides safe in-place replacement on Windows.
         """
         try:
-            bootstrap_script = os.path.join(os.getcwd(), "bootstrap_updater.py")
+            bootstrap_script = os.path.join(os.getcwd(), "maintenance_worker.py")
             if not os.path.exists(bootstrap_script):
                 return False
 

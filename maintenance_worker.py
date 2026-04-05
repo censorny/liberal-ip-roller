@@ -6,7 +6,7 @@ import shutil
 import subprocess
 
 def log(msg):
-    print(f"[BOOTSTRAP] {msg}")
+    print(f"[MAINTENANCE] {msg}")
 
 def main():
     if len(sys.argv) < 2:
@@ -63,6 +63,7 @@ def main():
             ".idea", 
             ".vscode",
             "bootstrap_updater.py",
+            "maintenance_worker.py",
             "app_rolling.log",
             ".env"
         }
