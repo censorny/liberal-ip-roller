@@ -3,7 +3,9 @@
 # 🛡️ Liberal IP Roller
 ### Industrial-grade Multi-Cloud IP Rotation Engine
 
-[![Release](https://img.shields.io/badge/Release-v0.3.2-success.svg)](#)
+![App Preview](assets/app_preview.png)
+
+[![Release](https://img.shields.io/badge/Release-v0.3.3-success.svg)](#)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Built with Textual](https://img.shields.io/badge/Built%20with-Textual-000000.svg)](https://github.com/Textualize/textual)
@@ -11,8 +13,6 @@
 
 **Автоматизируйте поиск специфических IP-адресов с хирургической точностью и промышленной надежностью.**  
 *Automate the search for specific IP ranges with surgical precision and industrial stability.*
-
-![App Preview](assets/app_preview.png)
 
 ---
 
@@ -98,7 +98,7 @@ python main.py
 | **Rotation Logic** | Sequential VPC IP Re-creation | Full Instance (VM) Cycling |
 | **Authorization** | SA Key Auth / IAM Support | API Token |
 | **Search Latency** | ⚡ Ultra fast (sub-second) | 🕒 Moderate (cloud-provisioning bound) |
-| **Primary Use Case** | High-velocity IP hunting. | Geo-specific pool discovery. |
+| **Primary Use Case** | High velocity IP hunting. | Geo-specific pool discovery. |
 
 ---
 
