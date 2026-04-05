@@ -1,0 +1,48 @@
+# Configuration & Credentials
+config.json
+*.json
+!version.json
+
+# Logs
+*.log
+app_rolling.log
+
+# Private keys (common naming patterns)
+*_key.json
+sa_key.json
+authorized_key.json
+*.pem
+*.key
+
+# Python / Environment
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.env
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Local folders
+source/
+temp/
+tmp/
+dist/
+build/
+*.egg-info/
+
+# OS specific
+.DS_Store
+Thumbs.db

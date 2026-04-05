@@ -1,0 +1,357 @@
+/* 
+ * Liberal IP Roller - TUI Design System 
+ * Standardized Visual Hierarchy (Theme: Dark/Light/High-Contrast)
+ */
+
+/* --- Variables (Theme Tokens) --- */
+$brand-primary: #3b82f6;   /* Modern Blue */
+$brand-success: #10b981;   /* Emerald Green */
+$brand-error: #ef4444;     /* Rose Red */
+$slate-900: #0f172a;       /* Deep Slate */
+$slate-800: #1e293b;       /* Dark Panel */
+$slate-600: #475569;       /* Muted Text */
+$slate-400: #94a3b8;       /* Deactivated */
+$slate-200: #e2e8f0;       /* Border Light */
+$slate-100: #f1f5f9;       /* Light Panel */
+$slate-50: #f8fafc;        /* Background Light */
+$white: #ffffff;
+$black: #000000;
+
+/* --- Base Layout --- */
+Screen { 
+    layout: vertical; 
+    align: center top; 
+}
+
+CustomHeader {
+    height: 1;
+    padding: 0 1;
+    background: $slate-800;
+    color: $white;
+}
+
+#header-brand { 
+    width: 1fr; 
+    text-style: bold; 
+    content-align: left middle; 
+}
+
+#header-version { 
+    width: auto; 
+    text-style: italic; 
+    color: $slate-400; 
+    content-align: right middle; 
+}
+
+#main-content {
+    background: transparent;
+    padding: 0;
+    height: 1fr;
+    layout: vertical;
+    align: center top;
+}
+
+/* --- Interactive Widgets --- */
+Input, TextArea { 
+    width: 40; 
+    height: 3; 
+}
+
+/* CIDR TextArea inside config forms — aligned with form fields, enough height for multiple ranges */
+.inputs-container TextArea {
+    width: 76;
+    height: 10;
+    margin: 0 2 1 2;
+}
+
+
+Button { 
+    text-style: bold; 
+}
+
+/* --- Theme Enforcement: DARK (Default) --- */
+.theme-dark, .theme-dark Screen { 
+    background: $black; 
+    color: $white; 
+}
+
+.theme-dark Label, .theme-dark Static { 
+    color: $white; 
+}
+
+.theme-dark Input, .theme-dark TextArea { 
+    background: transparent; 
+    color: $white; 
+    border: tall $slate-800; 
+}
+
+/* Heavy Action Buttons (Dark) */
+.theme-dark Button.-primary { background: $brand-primary; color: $white; border: none; }
+.theme-dark Button.-success { background: $brand-success; color: $white; border: none; }
+.theme-dark Button.-error   { background: $brand-error; color: $white; border: none; }
+
+/* --- Theme Enforcement: LIGHT --- */
+.theme-light, .theme-light Screen { 
+    background: #f8fafc; 
+    color: $slate-900; 
+}
+
+.theme-light Label, .theme-light Static { 
+    color: $slate-900; 
+}
+
+.theme-light CustomHeader { 
+    background: #f1f5f9; 
+    color: $slate-900; 
+    border-bottom: solid $brand-primary; 
+}
+
+.theme-light Footer { 
+    background: #f1f5f9; 
+    color: $slate-400; 
+}
+
+.theme-light Input, .theme-light TextArea { 
+    background: $white; 
+    color: $slate-900; 
+    border: tall $slate-200; 
+}
+
+/* --- Custom Components: Toggles --- */
+Button.toggle-button {
+    width: 30;
+    margin-bottom: 1;
+    height: 3;
+    background: transparent;
+    color: $slate-400;
+    border: tall $slate-400;
+    text-style: none;
+}
+
+.theme-dark Button.toggle-button {
+    border: tall $slate-800;
+    color: $slate-600;
+}
+
+Button.toggle-button.-active {
+    background: $brand-primary !important;
+    color: $white !important;
+    border: none !important;
+    text-style: bold;
+}
+
+/* --- Content Containers --- */
+.inputs-container { 
+    height: 1fr; 
+    align: center top; 
+}
+
+.inputs-container Horizontal { 
+    width: 80;
+    height: auto;
+    min-height: 4;
+    align: center middle; 
+    margin-bottom: 1; 
+    padding: 0 2;
+}
+
+.inputs-container Horizontal Label { 
+    width: 1fr; 
+    text-align: left; 
+    text-style: bold;
+}
+
+.inputs-container Horizontal Input,
+.inputs-container Horizontal Switch,
+.inputs-container Horizontal .toggle-stack {
+    width: 32;
+    align: right middle;
+}
+
+.toggle-stack {
+    width: 30;
+    align: right middle;
+    height: auto;
+}
+
+.separator {
+    width: 80;
+    height: 1;
+    border-top: solid $slate-200;
+    margin: 1 0;
+}
+
+.theme-dark .separator {
+    border-top: solid $slate-800;
+}
+
+/* --- Navigation & Sidebar --- */
+#sidebar {
+    width: 25;
+    background: #f1f5f9;
+    padding: 1 1;
+    border-right: tall $slate-200;
+}
+
+.theme-dark #sidebar { 
+    background: $slate-800; 
+    border-right: tall #334155; 
+}
+
+#sidebar Button { 
+    width: 23; 
+    margin-bottom: 1; 
+    text-align: left; 
+}
+
+/* --- Dashboard Dashboard Elements --- */
+#stats-panel { 
+    padding: 1 2; 
+    height: 6; 
+    layout: horizontal; 
+    align: center middle; 
+    border-bottom: tall $brand-primary; 
+    width: 100%; 
+    background: $white;
+}
+
+.theme-dark #stats-panel { background: $slate-800; }
+
+.stat-item { width: 1fr; align: center middle; text-align: center; }
+.stat-label { text-style: bold; color: $slate-400; }
+.stat-value { text-style: bold; color: $brand-primary; }
+
+#log-view {
+    background: $white;
+    color: $slate-900;
+    height: 1fr;
+    border: tall $slate-200;
+    margin: 1 2;
+}
+
+.theme-dark #log-view { background: $black; color: $white; border: tall $slate-800; }
+
+/* --- Forms & Modals --- */
+.action-row { 
+    dock: bottom;
+    height: 5; 
+    padding: 0 2; 
+    align: center middle; 
+    width: 100%; 
+    background: $slate-100;
+    border-top: tall $slate-200; 
+}
+
+.theme-dark .action-row {
+    background: $slate-800;
+    border-top: tall $slate-900;
+}
+
+.action-row Button { 
+    width: 25; 
+    margin: 0 1; 
+}
+
+#service-selection-box {
+    align: center middle;
+    margin-top: 5;
+    width: 64;
+    height: auto;
+    padding: 2 4;
+    background: $white;
+    border: tall $brand-primary; 
+}
+
+.theme-dark #service-selection-box { 
+    background: $slate-800; 
+    border: tall $brand-primary; 
+}
+
+#service-selection-box Label {
+    width: 100%;
+    text-align: center;
+}
+
+#service-selection-box Button {
+    width: 52;
+    height: 3;
+    margin: 1 0;
+    background: $brand-primary;
+    color: $white;
+    border: tall $brand-primary;
+    text-style: bold;
+}
+
+#service-selection-box Button:hover {
+    background: #2563eb;
+}
+
+#service-selection-box Button.-error,
+#service-selection-box #btn-exit {
+    background: $brand-error;
+    color: $white;
+    border: tall $brand-error;
+}
+
+.modal-dialog {
+    width: 60;
+    height: auto;
+    background: #f8fafc;
+    border: tall $brand-primary;
+    padding: 1 2;
+    align: center middle;
+}
+
+.theme-dark .modal-dialog {
+    background: $slate-800;
+    border: tall $brand-primary;
+}
+
+.ip-item-row {
+    width: 100%;
+    height: 3;
+    background: $white;
+    border: solid $slate-200;
+    margin-bottom: 1;
+    padding: 0 1;
+    align: center middle;
+}
+
+.theme-dark .ip-item-row {
+    background: #0f172a;
+    border: solid #334155;
+}
+
+.version-row {
+    height: auto;
+    margin-top: 1;
+}
+
+.version-row Label {
+    width: 1fr;
+    text-align: left;
+}
+
+.version-row Button {
+    width: 32;
+    background: $brand-primary;
+    color: $white;
+    border: double $white;
+    text-style: underline bold;
+}
+
+#update-status {
+    width: 100%;
+    text-align: center;
+    margin-top: 1;
+    color: $brand-success;
+    text-style: bold;
+}
+
+.update-status-hidden {
+    display: none;
+}
+
+/* Global Utility Classes */
+.title { text-align: center; width: 100%; text-style: bold; margin: 1 0; color: $brand-primary; }
+.subtitle { text-align: center; width: 100%; color: $slate-400; margin-bottom: 2; }
