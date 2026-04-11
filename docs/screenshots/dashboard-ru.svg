@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="768" viewBox="0 0 1280 768" role="img" aria-labelledby="title desc">
+  <title id="title">Liberal IP Roller Russian dashboard</title>
+  <desc id="desc">Russian interface screenshot of the Liberal IP Roller dashboard.</desc>
+  <defs>
+    <style>
+      .bg { fill: #27272a; }
+      .card { fill: #27272a; stroke: #3f3f46; stroke-width: 2; }
+      .accent { fill: #0084ff; }
+      .muted { fill: #a1a1aa; font-family: Consolas, 'Liberation Mono', monospace; font-size: 19px; font-weight: 700; }
+      .body { fill: #f4f4f5; font-family: Consolas, 'Liberation Mono', monospace; font-size: 20px; font-weight: 700; }
+      .brand { fill: #0084ff; font-family: Consolas, 'Liberation Mono', monospace; font-size: 24px; font-weight: 700; }
+      .version { fill: #a1a1aa; font-family: Consolas, 'Liberation Mono', monospace; font-size: 22px; font-style: italic; font-weight: 700; }
+      .success { fill: #10b981; }
+      .warning { fill: #f59e0b; }
+      .error { fill: #f43f5e; }
+    </style>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1280" height="768" rx="6" />
+  <text class="brand" x="30" y="34">Liberal IP Roller by censorny</text>
+  <text class="version" x="1160" y="34">v0.3.3</text>
+  <rect class="accent" x="0" y="46" width="1280" height="3" />
+  <rect class="card" x="28" y="90" width="310" height="620" rx="12" />
+  <rect class="card" x="56" y="134" width="256" height="42" rx="8" />
+  <rect class="card" x="56" y="218" width="256" height="42" rx="8" />
+  <rect class="card" x="56" y="302" width="256" height="42" rx="8" />
+  <rect class="card" x="56" y="386" width="256" height="42" rx="8" />
+  <rect class="card" x="56" y="470" width="256" height="42" rx="8" />
+  <text class="muted" x="95" y="160">Панель управления</text>
+  <text class="muted" x="115" y="244">Мои адреса</text>
+  <text class="muted" x="118" y="328">Настройки API</text>
+  <text class="muted" x="96" y="412">Настройки процесса</text>
+  <text class="muted" x="140" y="496">К выбору</text>
+  <rect class="card" x="378" y="90" width="862" height="120" rx="12" />
+  <text class="muted" x="454" y="134">СТАТУС</text>
+  <text class="muted" x="574" y="134">ПОПЫТКИ</text>
+  <text class="muted" x="684" y="134">СОВПАДЕНИЯ</text>
+  <text class="muted" x="840" y="134">ОШИБКИ</text>
+  <text class="muted" x="978" y="134">ВОРКЕРЫ</text>
+  <text class="muted" x="1110" y="134">АПТАЙМ</text>
+  <text class="body accent" x="454" y="178">ГОТОВ</text>
+  <text class="body accent" x="588" y="178">0</text>
+  <text class="body accent" x="714" y="178">0</text>
+  <text class="body accent" x="855" y="178">0</text>
+  <text class="body accent" x="1005" y="178">0</text>
+  <text class="body accent" x="1136" y="178">00:00</text>
+  <rect class="card" x="378" y="250" width="410" height="170" rx="12" />
+  <rect class="card" x="808" y="250" width="432" height="170" rx="12" />
+  <text class="body" x="404" y="298">Аналитика сессии</text>
+  <text class="body" x="846" y="298">Топ подсети</text>
+  <text class="body" x="404" y="342">Статистика появится после первых</text>
+  <text class="body" x="404" y="370">попыток.</text>
+  <text class="body" x="846" y="342">Статистика появится после первых</text>
+  <text class="body" x="846" y="370">попыток.</text>
+  <rect class="card" x="378" y="456" width="862" height="194" rx="12" />
+  <rect x="1197" y="486" width="22" height="126" fill="#000000" />
+  <rect class="card warning" x="590" y="684" width="196" height="46" rx="8" fill="none" stroke-width="3" />
+  <rect class="card success" x="805" y="684" width="196" height="46" rx="8" fill="none" stroke-width="3" />
+  <rect class="card error" x="1020" y="684" width="196" height="46" rx="8" fill="none" stroke-width="3" />
+  <text class="body warning" x="618" y="713">ОЧИСТИТЬ ЛОГИ</text>
+  <text class="body success" x="852" y="713">ЗАПУСТИТЬ</text>
+  <text class="body error" x="1094" y="713">СТОП</text>
+  <text class="body" x="14" y="760">q Quit</text>
+</svg>

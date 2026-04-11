@@ -1,0 +1,6 @@
+textual>=0.40.0
+httpx[http2]>=0.24.0
+h2>=4.1.0
+pydantic>=2.0.0
+PyJWT>=2.8.0
+cryptography>=41.0.0
