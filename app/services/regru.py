@@ -1,6 +1,6 @@
 import asyncio
 import ipaddress
-from typing import List, Optional, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple
 import httpx
 
 from .http_client import BaseServiceClient
@@ -8,7 +8,7 @@ from ..core.models import IPAddress, CloudStatus
 from ..core.protocol import CloudProvider
 
 class RegruClient(BaseServiceClient, CloudProvider):
-    """Reg.ru CloudVPS client with recursive public-IP extraction."""
+    """Reg.ru CloudVPS client with deep public-IP extraction."""
 
     def __init__(
         self, 
@@ -38,45 +38,137 @@ class RegruClient(BaseServiceClient, CloudProvider):
         self.vm_active_timeout = vm_active_timeout
         self.vm_delete_timeout = vm_delete_timeout
 
-    def _normalize_ip(self, value: Any) -> Optional[str]:
-        if not isinstance(value, str): return None
-        candidate = value.strip().split("/", 1)[0].strip()
+    def _normalize_public_ipv4(self, value: Any) -> str:
+        if not isinstance(value, str):
+            return ""
+        candidate = value.strip()
+        if not candidate:
+            return ""
+        if "/" in candidate:
+            candidate = candidate.split("/", 1)[0].strip()
         try:
             ip_obj = ipaddress.ip_address(candidate)
-            if ip_obj.version == 4 and not ip_obj.is_private:
-                return candidate
         except ValueError:
-            pass
-        return None
+            return ""
+        if ip_obj.version != 4:
+            return ""
+        if any([
+            ip_obj.is_private,
+            ip_obj.is_loopback,
+            ip_obj.is_link_local,
+            ip_obj.is_multicast,
+            ip_obj.is_unspecified,
+            ip_obj.is_reserved,
+        ]):
+            return ""
+        return candidate
 
-    def _collect_ip_candidates(self, node: Any, is_preferred: bool = False) -> Tuple[List[str], List[str]]:
-        preferred, fallback = [], []
-        
-        def walk(val, preferred_ctx):
+    def _collect_public_ip_candidates(self, node: Any, preferred: bool = False) -> Tuple[List[str], List[str]]:
+        preferred_list: List[str] = []
+        fallback_list: List[str] = []
+
+        def walk(val: Any, is_preferred: bool = False) -> None:
             if isinstance(val, dict):
-                # Detect markers for "Public" status in various API versions
-                markers = {str(val.get(k, "")).lower() for k in ("type", "scope", "kind")}
-                is_pub = preferred_ctx or any(m in ("public", "external", "internet") for m in markers)
-                is_pub = is_pub or val.get("public") is True
-                
-                for key in ("ip_address", "ip", "address", "public_ip", "ipv4"):
-                    ip = self._normalize_ip(val.get(key))
+                public_markers = {
+                    str(val.get("type", "")).lower(),
+                    str(val.get("scope", "")).lower(),
+                    str(val.get("network_type", "")).lower(),
+                    str(val.get("kind", "")).lower(),
+                    str(val.get("name", "")).lower(),
+                }
+                nested_preferred = is_preferred or any(
+                    m in {"public", "floating", "external", "internet"} for m in public_markers
+                )
+                nested_preferred = (
+                    nested_preferred
+                    or val.get("public") is True
+                    or val.get("is_public") is True
+                )
+                for key in (
+                    "ip_address", "ip", "address", "public_ip", "public_ipv4",
+                    "floating_ip", "floating_ip_address", "main_ip", "ipv4",
+                ):
+                    ip = self._normalize_public_ipv4(val.get(key))
                     if ip:
-                        (preferred if is_pub else fallback).append(ip)
-                
-                for k, v in val.items():
-                    if isinstance(v, (dict, list)): walk(v, is_pub)
+                        (preferred_list if nested_preferred else fallback_list).append(ip)
+                for child in val.values():
+                    if isinstance(child, (dict, list, tuple)):
+                        walk(child, nested_preferred)
             elif isinstance(val, (list, tuple)):
-                for item in val: walk(item, preferred_ctx)
-                
-        walk(node, is_preferred)
-        return preferred, fallback
+                for item in val:
+                    walk(item, is_preferred)
+            else:
+                ip = self._normalize_public_ipv4(val)
+                if ip:
+                    (preferred_list if is_preferred else fallback_list).append(ip)
+
+        walk(node, preferred)
+        return preferred_list, fallback_list
 
     def extract_public_ip(self, data: Dict[str, Any]) -> str:
-        """Deep recursive scan to find the elusive public IPv4 among diverse API payloads."""
-        preferred, fallback = self._collect_ip_candidates(data)
-        for ip in preferred + fallback:
-            if ip: return ip
+        """Priority-ordered deep scan matching the reg.ru reglet API structure."""
+        if not isinstance(data, dict):
+            return ""
+
+        preferred_candidates: List[str] = []
+        fallback_candidates: List[str] = []
+
+        # 1. networks dict — scan public/floating/external keys first
+        networks = data.get("networks")
+        if isinstance(networks, dict):
+            for key in ("public", "floating", "external", "v4", "ipv4", "v6", "ipv6"):
+                if key in networks:
+                    p, f = self._collect_public_ip_candidates(
+                        networks[key],
+                        preferred=key in {"public", "floating", "external"},
+                    )
+                    preferred_candidates.extend(p)
+                    fallback_candidates.extend(f)
+            p, f = self._collect_public_ip_candidates(networks)
+            preferred_candidates.extend(p)
+            fallback_candidates.extend(f)
+        elif networks is not None:
+            p, f = self._collect_public_ip_candidates(networks)
+            preferred_candidates.extend(p)
+            fallback_candidates.extend(f)
+
+        # 2. interface attachments
+        for key in ("interfaces", "network_interfaces"):
+            if key in data:
+                p, f = self._collect_public_ip_candidates(data[key])
+                preferred_candidates.extend(p)
+                fallback_candidates.extend(f)
+
+        # 3. other IP collection fields
+        for key in (
+            "v4", "ipv4", "v6", "ipv6", "ips", "ip_addresses", "addresses",
+            "floating_ips", "public_network", "public_interface", "public_interfaces",
+        ):
+            if key in data:
+                p, f = self._collect_public_ip_candidates(
+                    data[key],
+                    preferred=key in {"floating_ips", "public_network", "public_interface", "public_interfaces"},
+                )
+                preferred_candidates.extend(p)
+                fallback_candidates.extend(f)
+
+        # 4. direct scalar fields (fast path)
+        for key in (
+            "public_ip", "public_ipv4", "floating_ip", "floating_ip_address",
+            "main_ip", "access_ip_v4", "access_ip", "ip_address", "ipv4", "ip",
+        ):
+            ip = self._normalize_public_ipv4(data.get(key))
+            if ip:
+                return ip
+
+        # 5. full recursive fallback
+        p, f = self._collect_public_ip_candidates(data)
+        preferred_candidates.extend(p)
+        fallback_candidates.extend(f)
+
+        for ip in preferred_candidates + fallback_candidates:
+            if ip:
+                return ip
         return ""
 
     # ──────────────────────────────────────────────

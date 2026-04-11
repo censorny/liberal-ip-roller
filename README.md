@@ -172,6 +172,7 @@ python main.py -h --config path/to/config.json
 - Работает через lifecycle VM, поэтому медленнее Yandex.
 - Чувствителен к квотам и таймингам на стороне провайдера.
 - Если используете в проде, фидбек особенно полезен.
+- Интеграция построена на основе проекта [bUmmy1337/ip-roller](https://github.com/bUmmy1337/ip-roller).
 
 ### Selectel Floating IP
 
@@ -200,6 +201,18 @@ python main.py -h --config path/to/config.json
 - обезличенный фрагмент `config.json`;
 - точную команду запуска;
 - релевантный кусок `app_rolling.log` или headless-вывода.
+
+## Поддержать проект
+
+Приём USDT (via):
+
+| Сеть | Адрес |
+| --- | --- |
+| TON | `UQAStmfLsz9c3yRA3SeADT5kKdKSUZIt0i6z6B0A6gT884wE` |
+| TRC20 | `THCFoTpjGdaEkGvQe9V8A3WMdQMJ3fUhTq` |
+| SPL | `E1Z978yBMJ3UA4y7xZwv57cBxEUoZ5i9TMsrhcxfVRV6` |
+| ERC20 | `0xc6e0828F6aAF152E82fbEb9f7Abd39051208502F` |
+| BEP20 | `0xc6e0828F6aAF152E82fbEb9f7Abd39051208502F` |
 
 ## Статистика по звёздам
 

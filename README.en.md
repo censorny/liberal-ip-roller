@@ -146,6 +146,7 @@ The main configuration is stored in `config.json`. If the file does not exist, i
 - Works through VM lifecycle operations, so it is slower than Yandex.
 - Sensitive to provider quotas and provisioning timing.
 - Real-world feedback is especially useful here.
+- The integration is based on the [bUmmy1337/ip-roller](https://github.com/bUmmy1337/ip-roller) project.
 
 ### Selectel Floating IP
 
@@ -169,6 +170,18 @@ The repository includes issue templates for both generic bugs and provider-speci
 - `.github/ISSUE_TEMPLATE/provider_feedback.md`
 
 Please include provider, region, exact command, sanitized config fragments, and the relevant part of `app_rolling.log` or headless output.
+
+## Support the project
+
+USDT accepted in the following networks (via):
+
+| Network | Address |
+| --- | --- |
+| TON | `UQAStmfLsz9c3yRA3SeADT5kKdKSUZIt0i6z6B0A6gT884wE` |
+| TRC20 | `THCFoTpjGdaEkGvQe9V8A3WMdQMJ3fUhTq` |
+| SPL | `E1Z978yBMJ3UA4y7xZwv57cBxEUoZ5i9TMsrhcxfVRV6` |
+| ERC20 | `0xc6e0828F6aAF152E82fbEb9f7Abd39051208502F` |
+| BEP20 | `0xc6e0828F6aAF152E82fbEb9f7Abd39051208502F` |
 
 ## Star history
 

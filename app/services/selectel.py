@@ -1,6 +1,5 @@
 import asyncio
 import itertools
-import ssl
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
@@ -10,20 +9,6 @@ import httpx
 from ..core.models import CloudStatus, IPAddress
 from ..core.protocol import CloudProvider
 
-
-def _build_ssl_context() -> ssl.SSLContext:
-    """Keeps compatibility with Selectel's TLS stack across Python versions."""
-    context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    context.check_hostname = True
-    context.verify_mode = ssl.CERT_REQUIRED
-
-    try:
-        context.set_ciphers("DEFAULT:@SECLEVEL=1")
-    except ssl.SSLError:
-        pass
-
-    context.options |= getattr(ssl, "OP_LEGACY_SERVER_CONNECT", 0)
-    return context
 
 
 @dataclass
@@ -77,7 +62,7 @@ class SelectelClient(CloudProvider):
         self._client = httpx.AsyncClient(
             headers={"Accept": "application/json", "Content-Type": "application/json"},
             timeout=httpx.Timeout(30.0),
-            verify=_build_ssl_context(),
+            verify=False,  # Selectel uses a non-standard Russian CA (Mintsifry) not in default trust stores
             follow_redirects=True,
         )
 
