@@ -4,6 +4,7 @@ from typing import Any, Awaitable, Callable, Optional
 from .core.roller import Roller
 from .core.events import bus, LogEvent
 from .infrastructure.task_manager import app_lifecycle
+from .infrastructure.notifications import setup_notifications
 from .services.regru import RegruClient
 from .services.selectel import SelectelClient
 from .services.yandex import YandexClient
@@ -124,6 +125,12 @@ class AppController:
 
             if validation_issues:
                 raise ValueError(" ".join(validation_issues))
+                
+            setup_notifications(
+                tg_config=config.telegram,
+                report_matches=svc.process.report_matches_to_tg,
+                report_errors=svc.process.report_errors_to_tg,
+            )
 
             if not svc.process.dry_run:
                 await self.initialize_provider()

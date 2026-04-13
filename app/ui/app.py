@@ -127,13 +127,13 @@ class LiberallyApp(App):
             await self.controller.provider.close()
             self.controller.provider = None
 
-    def on_ui_log_message(self, message: UILogMessage):
+    def on_uilog_message(self, message: UILogMessage):
         self.logs_cache.append(message.message)
         dashboard = self._dashboard()
         if dashboard is not None:
             dashboard.log_message(message.message)
 
-    def on_ui_stats_update(self, message: UIStatsUpdate):
+    def on_uistats_update(self, message: UIStatsUpdate):
         dashboard = self._dashboard()
         if dashboard is not None:
             dashboard.apply_stats(message.stats)

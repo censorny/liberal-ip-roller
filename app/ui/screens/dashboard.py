@@ -196,7 +196,7 @@ class Dashboard(BaseScreen):
                         await self.app.manage_addresses()
                     finally:
                         self._is_pushing = False
-                asyncio.create_task(run_managed())
+                self.run_worker(run_managed())
 
     def log_message(self, message: str) -> None:
         """ Writes a message to the real-time RichLog. """

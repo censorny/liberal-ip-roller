@@ -1,6 +1,6 @@
 {
     "version": "0.4.1",
-    "release_date": "2026-04-11",
-    "description": "v0.4.1 hotfix — Fix Selectel SSL (non-standard CA), improve Reg.ru IP extraction"
+    "release_date": "2026-04-13",
+    "description": "Release v0.4.1 — Yandex rolling and Telegram notification fixes"
 }
 
