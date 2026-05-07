@@ -16,7 +16,7 @@ class RegruClient(BaseServiceClient, CloudProvider):
         region_slug: str, 
         server_size: str, 
         server_image: str,
-        base_url: str = "https://api.cloudvps.reg.ru/v1/reglets",
+        base_url: str = "https://api.cloudvps.reg.ru/v1",
         initial_wait: float = 90.0,
         stability_checks: int = 3,
         check_interval: float = 5.0,
@@ -176,7 +176,7 @@ class RegruClient(BaseServiceClient, CloudProvider):
     # ──────────────────────────────────────────────
 
     async def list_addresses(self) -> List[IPAddress]:
-        resp = await self._request("GET", "")
+        resp = await self._request("GET", "ips") # https://developers.cloudvps.reg.ru/add-ip/add.html то-же, чтобы пустого значения не было иначе слэш в конце добавит
         reglets = resp.json().get("reglets", [])
         excluded = {"archive", "deleted", "error"}
         return [self._to_model(r) for r in reglets if str(r.get("status", "")).lower() not in excluded]
@@ -190,7 +190,9 @@ class RegruClient(BaseServiceClient, CloudProvider):
             "region_slug": self.region_slug,
             "size": self.server_size,
         }
-        resp = await self._request("POST", "", json=payload)
+        resp = await self._request("POST", "reglets", json=payload) # из-за path = f"/{path.lstrip('/')}" в __init__.py и пустого значения тут
+        # на выходе получаем https://api.cloudvps.reg.ru/v1/reglets/ со слэшем в конце, а такая точка входа не валидна. Легче тут поставить куда отправлять а в config.json прописать просто https://api.cloudvps.reg.ru/v1
+        # ну или можно переделать path в __init__.py на что-то типо path = f"/{path.strip('/')}" if path.strip('/') else ""
         return str(resp.json().get("reglet", {}).get("id", ""))
 
     async def wait_for_operation(self, op_id: str, timeout: int = 300) -> str:
