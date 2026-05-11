@@ -20,6 +20,19 @@ class YandexQuotaException(Exception):
     """Raised when the folder has reached its external IP limit."""
 
 
+class YandexApiError(Exception):
+    """Raised for non-quota Yandex VPC API errors; carries the server response body."""
+
+    def __init__(self, status_code: int, body: str, url: str) -> None:
+        self.status_code = status_code
+        self.body = body
+        self.url = url
+        super().__init__(f"Yandex VPC API {status_code} for {url}: {body or '<empty body>'}")
+
+
+_QUOTA_HINTS = ("limit", "quota", "exceeded", "reached", "resource_exhausted")
+
+
 class YandexClient(BaseServiceClient, CloudProvider):
     """Refactored Yandex Cloud VPC client."""
 
@@ -110,11 +123,21 @@ class YandexClient(BaseServiceClient, CloudProvider):
             if error.response.status_code == 401 and self.sa_key_path and await self._refresh_iam_token():
                 return await super()._request(method, path, **kwargs)
 
-            if error.response.status_code == 403:
-                raise PermissionError("Yandex folder access denied. Check IAM permissions for the configured folder.") from error
+            body = (error.response.text or "").strip()
+            url = str(error.response.request.url)
 
-            if error.response.status_code == 400 and "limit" in error.response.text.lower():
-                raise YandexQuotaException(error.response.text) from error
+            if error.response.status_code == 403:
+                raise PermissionError(
+                    f"Yandex folder access denied. Check IAM permissions for the configured folder. Response: {body or '<empty>'}"
+                ) from error
+
+            if error.response.status_code in (400, 429):
+                lowered = body.lower()
+                if any(hint in lowered for hint in _QUOTA_HINTS):
+                    raise YandexQuotaException(body) from error
+
+            if error.response.status_code == 400:
+                raise YandexApiError(400, body, url) from error
 
             raise
 
